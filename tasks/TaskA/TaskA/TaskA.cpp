@@ -64,17 +64,49 @@ int main(int argc, char* argv[])
         string fileContents;
         ifstream file(fileName);
         if (!file.is_open()) {
-            // when can't find file, display error message and return
+            //when can't find file, display error message and return
             cerr << "File not found" << endl;
             return 1;
         }
 
         string line;
+        //iterate over every line in file, appending them to the contents string
         while (getline(file, line)) {
             fileContents.append(line);
         }
 
+        //output entire file to console
         cout << fileContents << endl;
+
+        //this is for iterating over the whole file to remove any punctuation
+        //instantiate string that will contain all non-punctuation characters
+        string cleanedContents;
+
+        //iterate over each character in the string
+        for (int i = 0; i < fileContents.size(); i++) {
+            //append the chatacter to the cleanedContents string if not punctuation
+            if (!ispunct(fileContents[i])) {
+                cleanedContents = cleanedContents + fileContents[i];
+            }
+        }
+
+
+        stringstream cleanedContentsStream(cleanedContents);
+
+        string token;
+        vector<string> tokens;
+        char delimiter = ' ';
+
+        while (getline(cleanedContentsStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+
+        int searchStringFrequency(0);
+        for (int i = 0; i < tokens.size(); i++) {
+            if (tokens[i] == searchString) {
+                searchStringFrequency++;
+            }
+        }
         // end of stuff i've added
         //Done
         return EXIT_SUCCESS;
