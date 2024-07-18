@@ -84,29 +84,53 @@ int main(int argc, char* argv[])
 
         //iterate over each character in the string
         for (int i = 0; i < fileContents.size(); i++) {
-            //append the chatacter to the cleanedContents string if not punctuation
+            //append the character to the cleanedContents string if not punctuation
             if (!ispunct(fileContents[i])) {
-                cleanedContents = cleanedContents + fileContents[i];
+                //append it lowercase to avoid the same problem with capitalization making the same word not equal
+                cleanedContents = cleanedContents + (char)tolower(fileContents[i]);
             }
         }
 
 
         stringstream cleanedContentsStream(cleanedContents);
 
+
         string token;
+        //initialise a vector that will hold every word, or 'token' after splitting the string
         vector<string> tokens;
+        //delimiter is the character to split the string on, in this case ' ' to find each individual word
         char delimiter = ' ';
 
+        //continually fetch subsequent tokens from stringstream and add them to the end of the vector
         while (getline(cleanedContentsStream, token, delimiter)) {
             tokens.push_back(token);
         }
 
+        //this part is to convert the search string all lowercase, to match the cleanedContents we turned all lowercase earlier
+        //initialise a new string to append all the lowercased chars to
+        string cleanedSearchString;
+        //iterate over every char in original search string
+        for (int i = 0; i < searchString.size(); i++) {
+            char x(searchString[i]);
+            //append lowercased char to cleaned search term
+            cleanedSearchString = cleanedSearchString + (char)tolower(x);
+        }
+
+        //this part is to iterate over every token i.e every word in the cleaned file contents, and increment a counter every time a
+        //match to the search term is found
+        //initialise counter as 0
         int searchStringFrequency(0);
+        //iterate over every token in the vector
         for (int i = 0; i < tokens.size(); i++) {
-            if (tokens[i] == searchString) {
+            //if the current token matches the cleaned search term, increment counter
+            if (tokens[i] == cleanedSearchString) {
                 searchStringFrequency++;
             }
         }
+
+        //output results
+        cout << "Found string: '" << searchString << "' a total of " << searchStringFrequency << " times." << endl;
+
         // end of stuff i've added
         //Done
         return EXIT_SUCCESS;
