@@ -9,7 +9,9 @@ using namespace std;
 
 //See bottom of main
 int findArg(int argc, char* argv[], string pattern);
-
+int findMatch(vector<string>& tokens, string& searchTerm, int& lineNumber);
+string cleanText(string& text);
+vector<string> tokenize(string& text);
 
 /*
  *
@@ -69,68 +71,16 @@ int main(int argc, char* argv[])
             return 1;
         }
 
+        string cleanedSearchString = cleanText(searchString);
         string line;
+        int lineCount(1);
         //iterate over every line in file, appending them to the contents string
         while (getline(file, line)) {
-            fileContents.append(line);
+            string cleanedContents = cleanText(line);
+            vector<string> tokens = tokenize(cleanedContents);
+            findMatch(tokens, cleanedSearchString, lineCount);
+            lineCount++;
         }
-
-        //output entire file to console
-        cout << fileContents << endl;
-
-        //this is for iterating over the whole file to remove any punctuation
-        //instantiate string that will contain all non-punctuation characters
-        string cleanedContents;
-
-        //iterate over each character in the string
-        for (int i = 0; i < fileContents.size(); i++) {
-            //append the character to the cleanedContents string if not punctuation
-            if (!ispunct(fileContents[i])) {
-                //append it lowercase to avoid the same problem with capitalization making the same word not equal
-                cleanedContents = cleanedContents + (char)tolower(fileContents[i]);
-            }
-        }
-
-
-        stringstream cleanedContentsStream(cleanedContents);
-
-
-        string token;
-        //initialise a vector that will hold every word, or 'token' after splitting the string
-        vector<string> tokens;
-        //delimiter is the character to split the string on, in this case ' ' to find each individual word
-        char delimiter = ' ';
-
-        //continually fetch subsequent tokens from stringstream and add them to the end of the vector
-        while (getline(cleanedContentsStream, token, delimiter)) {
-            tokens.push_back(token);
-        }
-
-        //this part is to convert the search string all lowercase, to match the cleanedContents we turned all lowercase earlier
-        //initialise a new string to append all the lowercased chars to
-        string cleanedSearchString;
-        //iterate over every char in original search string
-        for (int i = 0; i < searchString.size(); i++) {
-            char x(searchString[i]);
-            //append lowercased char to cleaned search term
-            cleanedSearchString = cleanedSearchString + (char)tolower(x);
-        }
-
-        //this part is to iterate over every token i.e every word in the cleaned file contents, and increment a counter every time a
-        //match to the search term is found
-        //initialise counter as 0
-        int searchStringFrequency(0);
-        //iterate over every token in the vector
-        for (int i = 0; i < tokens.size(); i++) {
-            //if the current token matches the cleaned search term, increment counter
-            if (tokens[i] == cleanedSearchString) {
-                searchStringFrequency++;
-            }
-        }
-
-        //output results
-        cout << "Found string: '" << searchString << "' a total of " << searchStringFrequency << " times." << endl;
-
         // end of stuff i've added
         //Done
         return EXIT_SUCCESS;
@@ -159,4 +109,44 @@ int findArg(int argc, char* argv[], string pattern)
         }
     }
     return 0;
+}
+
+int findMatch(vector<string>& tokens, string& searchTerm, int& lineNumber) {
+    //iterate over every token in the vector
+    for (int i = 0; i < tokens.size(); i++) {
+        //if the current token matches the cleaned search term, increment counter
+        if (tokens[i] == searchTerm) {
+            cout << "Search term found on line " << lineNumber << ", word " << i + 1 << endl;
+        }
+    }
+    return 0;
+}
+string cleanText(string& text) {
+    //this part is to convert the text all lowercase and remove all punctuation
+    //initialise a new string to append all the lowercased chars to
+    string cleanedText;
+    //iterate over every char in original text
+    for (int i = 0; i < text.size(); i++) {
+        //check if the character is punctuation or not
+        if (!ispunct(text[i])) {
+            char x(text[i]);
+            //append lowercased char to cleaned text
+            cleanedText = cleanedText + (char)tolower(x);
+        }
+    }
+    return cleanedText;
+}
+
+vector<string> tokenize(string& text) {
+    string token;
+    //initialise a vector that will hold every word, or 'token' after splitting the string
+    vector<string> tokens;
+    //delimiter is the character to split the string on, in this case ' ' to find each individual word
+    stringstream textStream(text);
+    char delimiter(' ');
+    //continually fetch subsequent tokens from stringstream and add them to the end of the vector
+    while (getline(textStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
 }
