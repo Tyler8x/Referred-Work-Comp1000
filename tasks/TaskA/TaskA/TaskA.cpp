@@ -7,12 +7,26 @@
 #include <string>
 using namespace std;
 
+
+class match {
+public:
+    int wordNumber;
+    int lineNumber;
+    string output() {
+        stringstream ss;
+        ss << "Search found on line " << lineNumber << ", word " << wordNumber;
+        return ss.str();
+    }
+};
+
 //See bottom of main
 int findArg(int argc, char* argv[], string pattern);
-vector<int> findMatch(vector<string>& tokens, string& searchTerm);
+void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber, vector<match>& matches);
 string cleanText(string& text);
 vector<string> tokenize(string& text);
 const char TOKEN_DELIMITER = ' ';
+
+
 
 /*
  *
@@ -100,24 +114,27 @@ int main(int argc, char* argv[])
 
         string cleanedSearchString = cleanText(searchString);
         string line;
-        float totalMatches(0);
         float totalWords(0);
         int lineCount(1);
+        vector<match> matches;
         //iterate over every line in file, cleaning it, splitting it into words and searching those words for matches
         while (getline(file, line)) {
             string cleanedContents = cleanText(line);
             vector<string> tokens = tokenize(cleanedContents);
             totalWords += tokens.size();
-            vector<int> matches = findMatch(tokens, cleanedSearchString);
-            totalMatches += matches.size();
+            findMatch(tokens, cleanedSearchString, lineCount, matches);
             //iterate over all the matches, and output the results with the correct line and word numbers
-            for (int i = 0; i < matches.size(); i++) {
-                cout << "Search term found on line " << lineCount << ", word " << matches[i] << endl;
-            }
             lineCount++;
         }
-        float matchPercentage(totalMatches / totalWords * 100);
-        cout << "Found " << totalMatches << " matches out of " << totalWords << " words. " << matchPercentage << "% match rate." << endl;
+
+        float matchPercentage(matches.size() / totalWords * 100);
+        cout << "Found " << matches.size() << " matches out of " << totalWords << " words. " << matchPercentage << "% match rate." << endl;
+
+        //iterate over all the matches found, and cout their output message
+        for (int i = 0; i < matches.size(); i++) {
+            cout << matches[i].output() << endl;
+        }
+
         // end of stuff i've added
         //Done
         return EXIT_SUCCESS;
@@ -148,16 +165,18 @@ int findArg(int argc, char* argv[], string pattern)
     return 0;
 }
 
-vector<int> findMatch(vector<string>& tokens, string& searchTerm) {
+void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber, vector<match>& matches) {
     //iterate over every token in the vector
-    vector<int> wordNumbers;
     for (int i = 0; i < tokens.size(); i++) {
         //if the current token matches the cleaned search term, increment counter
         if (tokens[i] == searchTerm) {
-            wordNumbers.push_back(i + 1);
+            match foundMatch;
+            foundMatch.wordNumber = i + 1;
+            foundMatch.lineNumber = lineNumber;
+            matches.push_back(foundMatch);
         }
     }
-    return wordNumbers;
+    return;
 }
 string cleanText(string& text) {
     //this part is to convert the text all lowercase and remove all punctuation
