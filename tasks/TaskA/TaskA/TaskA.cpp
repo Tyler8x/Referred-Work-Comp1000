@@ -9,7 +9,7 @@ using namespace std;
 
 //See bottom of main
 int findArg(int argc, char* argv[], string pattern);
-void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber);
+vector<int> findMatch(vector<string>& tokens, string& searchTerm);
 string cleanText(string& text);
 vector<string> tokenize(string& text);
 const char TOKEN_DELIMITER = ' ';
@@ -100,14 +100,24 @@ int main(int argc, char* argv[])
 
         string cleanedSearchString = cleanText(searchString);
         string line;
+        float totalMatches(0);
+        float totalWords(0);
         int lineCount(1);
         //iterate over every line in file, cleaning it, splitting it into words and searching those words for matches
         while (getline(file, line)) {
             string cleanedContents = cleanText(line);
             vector<string> tokens = tokenize(cleanedContents);
-            findMatch(tokens, cleanedSearchString, lineCount);
+            totalWords += tokens.size();
+            vector<int> matches = findMatch(tokens, cleanedSearchString);
+            totalMatches += matches.size();
+            //iterate over all the matches, and output the results with the correct line and word numbers
+            for (int i = 0; i < matches.size(); i++) {
+                cout << "Search term found on line " << lineCount << ", word " << matches[i] << endl;
+            }
             lineCount++;
         }
+        float matchPercentage(totalMatches / totalWords * 100);
+        cout << "Found " << totalMatches << " matches out of " << totalWords << " words. " << matchPercentage << "% match rate." << endl;
         // end of stuff i've added
         //Done
         return EXIT_SUCCESS;
@@ -138,15 +148,16 @@ int findArg(int argc, char* argv[], string pattern)
     return 0;
 }
 
-void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber) {
+vector<int> findMatch(vector<string>& tokens, string& searchTerm) {
     //iterate over every token in the vector
+    vector<int> wordNumbers;
     for (int i = 0; i < tokens.size(); i++) {
         //if the current token matches the cleaned search term, increment counter
         if (tokens[i] == searchTerm) {
-            cout << "Search term found on line " << lineNumber << ", word " << i + 1 << endl;
+            wordNumbers.push_back(i + 1);
         }
     }
-    return;
+    return wordNumbers;
 }
 string cleanText(string& text) {
     //this part is to convert the text all lowercase and remove all punctuation
