@@ -9,9 +9,10 @@ using namespace std;
 
 //See bottom of main
 int findArg(int argc, char* argv[], string pattern);
-int findMatch(vector<string>& tokens, string& searchTerm, int& lineNumber);
+void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber);
 string cleanText(string& text);
 vector<string> tokenize(string& text);
+const char TOKEN_DELIMITER = ' ';
 
 /*
  *
@@ -50,6 +51,32 @@ int main(int argc, char* argv[])
     // argc is the number of strings in the array argv
     // These are passed to the application as command line arguments
     // Return value should be EXIT_FAILURE if the application exited with any form of error, or EXIT_SUCCESS otherwise
+    if (argc == 2) {
+        //Welcome message
+        cout << "TaskA (c)2024" << endl;
+
+        //fetch filename from arguments
+        string fileName(argv[1]);
+
+        //check file is valid and openable
+        ifstream file(fileName);
+        if (!file.is_open()) {
+            //when can't find file, display error message and return
+            cerr << "File not found" << endl;
+            return EXIT_FAILURE;
+        }
+        string fileContents;
+        string line;
+        //iterate over every line in file, appending them to the contents string
+        while (getline(file, line)) {
+            fileContents.append(line);
+        }
+
+        //output full file contents
+        cout << fileContents << endl;
+
+        return EXIT_SUCCESS;
+    }
 
     if (argc == 3) {
         //Welcome message
@@ -68,13 +95,13 @@ int main(int argc, char* argv[])
         if (!file.is_open()) {
             //when can't find file, display error message and return
             cerr << "File not found" << endl;
-            return 1;
+            return EXIT_FAILURE;
         }
 
         string cleanedSearchString = cleanText(searchString);
         string line;
         int lineCount(1);
-        //iterate over every line in file, appending them to the contents string
+        //iterate over every line in file, cleaning it, splitting it into words and searching those words for matches
         while (getline(file, line)) {
             string cleanedContents = cleanText(line);
             vector<string> tokens = tokenize(cleanedContents);
@@ -111,7 +138,7 @@ int findArg(int argc, char* argv[], string pattern)
     return 0;
 }
 
-int findMatch(vector<string>& tokens, string& searchTerm, int& lineNumber) {
+void findMatch(vector<string>& tokens, string& searchTerm, int lineNumber) {
     //iterate over every token in the vector
     for (int i = 0; i < tokens.size(); i++) {
         //if the current token matches the cleaned search term, increment counter
@@ -119,7 +146,7 @@ int findMatch(vector<string>& tokens, string& searchTerm, int& lineNumber) {
             cout << "Search term found on line " << lineNumber << ", word " << i + 1 << endl;
         }
     }
-    return 0;
+    return;
 }
 string cleanText(string& text) {
     //this part is to convert the text all lowercase and remove all punctuation
@@ -143,9 +170,8 @@ vector<string> tokenize(string& text) {
     vector<string> tokens;
     //delimiter is the character to split the string on, in this case ' ' to find each individual word
     stringstream textStream(text);
-    char delimiter(' ');
     //continually fetch subsequent tokens from stringstream and add them to the end of the vector
-    while (getline(textStream, token, delimiter)) {
+    while (getline(textStream, token, TOKEN_DELIMITER)) {
         tokens.push_back(token);
     }
     return tokens;
